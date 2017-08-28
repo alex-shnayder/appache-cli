@@ -1,9 +1,15 @@
 {
   "name": "appache-cli",
   "version": "0.0.0",
+  "description": "",
+  "author": "Alex Shnayder <alex@shnayder.pro>",
+  "repository": "alex-shnayder/appache-cli",
+  "homepage": "https://github.com/alex-shnayder/appache-cli#readme",
+  "bugs": "https://github.com/alex-shnayder/appache-cli/issues",
   "license": "ISC",
   "scripts": {
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "test": "mocha --require denude/register src/**/tests/*.js"
   },
   "lint-staged": {
     "*.js": [
@@ -17,5 +23,12 @@
     "eslint-plugin-import": "^2.2.0",
     "husky": "^0.13.3",
     "lint-staged": "^3.4.0"
+  },
+  "peerDependencies": {
+    "appache": "^0.1.0"
+  },
+  "dependencies": {
+    "chalk": "^2.1.0",
+    "columnify": "^1.5.4"
   }
 }
