@@ -113,3 +113,5 @@ module.exports = function* cliPlugin() {
     return `Help is unavailable for "${inputName}"`
   })
 }
+
+module.exports.interface = ['cli']
