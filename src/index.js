@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { next, hook, fork, toot, tootWith } = require('appache/effects')
+const { next, hook, fork, toot, tootWith, preHook } = require('appache/effects')
 const {
   InputError, findDefaultCommand, findCommandByFullName, getCommandFromEvent,
 } = require('appache/common')
@@ -69,12 +69,12 @@ function handleError(config, err, event) {
 }
 
 module.exports = function* cliPlugin() {
-  yield hook('schema', function* (schema) {
+  yield preHook('schema', (schema) => {
     schema = modifySchema(schema)
-    return yield next(schema)
+    return [schema]
   })
 
-  yield hook('activate', function* (config, ...args) {
+  yield preHook('activate', function* (config) {
     yield fork('async', function* () {
       let args = process.argv.slice(2)
 
@@ -87,8 +87,6 @@ module.exports = function* cliPlugin() {
         yield tootWith('error', handleError, err)
       }
     })
-
-    return yield next(config, ...args)
   })
 
   yield hook('process', function* (_, command) {
