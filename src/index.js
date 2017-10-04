@@ -113,3 +113,4 @@ module.exports = function* cliPlugin() {
 }
 
 module.exports.interface = ['cli']
+module.exports.tags = ['interface', 'cli']
