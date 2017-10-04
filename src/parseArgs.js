@@ -4,6 +4,9 @@ const {
 
 
 const SHORT_OPTION_FORMAT = /^[a-zA-Z0-9]$/
+const CONSUME_BY_TYPE = {
+  boolean: false,
+}
 
 
 function tokenizeArgs(args) {
@@ -97,8 +100,16 @@ function parseArgs(args, config) {
       if (isLong && eqPos) {
         value = body.substr(eqPos + 1)
       } else if (!isLong && optionConfig) {
-        let { consume } = optionConfig
+        let { consume, type } = optionConfig
         let nextArg = args[i + 1]
+
+        if (typeof consume === 'undefined') {
+          consume = CONSUME_BY_TYPE[type]
+        }
+
+        if (typeof consume === 'undefined') {
+          consume = true
+        }
 
         if (consume && nextArg && nextArg.kind === 'value') {
           i++
