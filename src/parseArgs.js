@@ -1,5 +1,5 @@
 const {
-  InputError, findByIds, findOneByNames, findDefaultCommand,
+  InputError, findByIds, findOneByNames, findRootCommands,
 } = require('appache/common')
 
 
@@ -50,18 +50,18 @@ function extractFromCommandConfig(commandConfig, config) {
 }
 
 function parseArgs(args, config) {
-  let defaultCommand = findDefaultCommand(config)
+  let rootCommands = findRootCommands(config)
 
-  if (!defaultCommand) {
-    throw new Error('No default command defined')
+  if (rootCommands.length !== 1) {
+    throw new Error('The CLI interface can only work with exactly one root command')
   }
 
   let {
     commands, options, positionalOptions,
-  } = extractFromCommandConfig(defaultCommand, config)
+  } = extractFromCommandConfig(rootCommands[0], config)
   let currentResult = {
-    fullName: [defaultCommand.name],
-    inputName: defaultCommand.name,
+    fullName: [rootCommands[0].name],
+    inputName: rootCommands[0].name,
     options: [],
   }
   let results = [currentResult]

@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 const { next, hook, fork, toot, tootWith, preHook } = require('appache/effects')
 const {
-  InputError, findDefaultCommand, findCommandByFullName, getCommandFromEvent,
+  InputError, findRootCommands, findCommandByFullName, getCommandFromEvent,
 } = require('appache/common')
 const { wrap } = require('./utils')
 const composeHelp = require('./help')
@@ -37,7 +37,7 @@ function handleError(config, err, event) {
     return print(err, 'error')
   }
 
-  let commandConfig = findDefaultCommand(config, true)
+  let commandConfig = findRootCommands(config, true)[0]
   let commandName
 
   if (err.command) {
