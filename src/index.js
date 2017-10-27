@@ -1,7 +1,8 @@
 const chalk = require('chalk')
-const { next, hook, fork, toot, tootWith, preHook } = require('appache/effects')
+const { fork, toot, tootWith, preHook } = require('appache/effects')
 const {
-  InputError, findRootCommands, findCommandByFullName, getCommandFromEvent,
+  findRootCommands, findCommandByFullName, getCommandFromEvent, InputError,
+  Help,
 } = require('appache/common')
 const { wrap } = require('./utils')
 const composeHelp = require('./help')
@@ -26,9 +27,22 @@ function print(value, maxWidth, level = 'log') {
 }
 
 function handleResult(command, result) {
+  let { config, inputName } = command
+  let wrap = config && config.wrap
+
+  if (result instanceof Help) {
+    ({ config, inputName } = result.command)
+
+    if (config) {
+      wrap = 0
+      result = composeHelp(config, inputName)
+    } else {
+      result = `Help is unavailable for ${inputName}`
+    }
+  }
+
   if (typeof result !== 'undefined') {
-    let maxWidth = command.config && command.config.wrap
-    print(result, maxWidth)
+    print(result, wrap)
   }
 }
 
@@ -93,28 +107,6 @@ module.exports = function* cliPlugin() {
         yield tootWith('error', handleError, err)
       }
     })
-  })
-
-  yield hook('process', function* (_, command) {
-    let { inputName, options, config } = command
-
-    let isHelpAsked = options && options.some((option) => {
-      return option.config && option.config.isHelpOption
-    })
-
-    if (!isHelpAsked) {
-      return yield next(_, command)
-    }
-
-    if (config) {
-      if (typeof config.help === 'string') {
-        return config.help
-      } else {
-        return composeHelp(config, inputName)
-      }
-    }
-
-    return `Help is unavailable for "${inputName}"`
   })
 }
 
