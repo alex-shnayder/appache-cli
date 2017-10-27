@@ -69,12 +69,18 @@ function handleError(config, err, event) {
 }
 
 module.exports = function* cliPlugin() {
-  yield preHook('schema', (schema) => {
+  yield preHook({
+    event: 'schema',
+    tags: ['modifyCommandSchema', 'modifyOptionSchema'],
+  }, (schema) => {
     schema = modifySchema(schema)
     return [schema]
   })
 
-  yield preHook('activate', function* (config) {
+  yield preHook({
+    event: 'activate',
+    tags: ['interface'],
+  }, function* (config) {
     yield fork('async', function* () {
       let args = process.argv.slice(2)
 
