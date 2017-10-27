@@ -26,10 +26,10 @@
     "mocha": "^3.5.0"
   },
   "peerDependencies": {
-    "appache": "^0.4.0"
+    "appache": "^0.5.0"
   },
   "dependencies": {
-    "chalk": "^2.1.0",
+    "chalk": "^2.3.0",
     "columnify": "^1.5.4"
   }
 }
