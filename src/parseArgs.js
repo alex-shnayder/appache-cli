@@ -3,6 +3,7 @@ const {
 } = require('appache/common')
 
 
+// This only matches latin characters, while ideally it would match any letters
 const SHORT_OPTION_FORMAT = /^[a-zA-Z0-9]$/
 const CONSUME_BY_TYPE = {
   boolean: false,

@@ -34,8 +34,8 @@ function handleResult(command, result) {
     ({ config, inputName } = result.command)
 
     if (config) {
-      wrap = 0
       result = composeHelp(config, inputName)
+      wrap = 0
     } else {
       result = `Help is unavailable for ${inputName}`
     }
