@@ -26,7 +26,7 @@
     "mocha": "^3.5.0"
   },
   "peerDependencies": {
-    "appache": "^0.5.0"
+    "appache": "^0.6.0"
   },
   "dependencies": {
     "chalk": "^2.3.0",
