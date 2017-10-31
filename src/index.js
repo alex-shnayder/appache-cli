@@ -2,7 +2,7 @@ const chalk = require('chalk')
 const { fork, toot, tootWith, preHook } = require('appache/effects')
 const {
   findRootCommands, findCommandByFullName, getCommandFromEvent, InputError,
-  Help,
+  Result, Help,
 } = require('appache/common')
 const { wrap } = require('./utils')
 const composeHelp = require('./help')
@@ -26,37 +26,40 @@ function print(value, maxWidth, level = 'log') {
   console[level]()
 }
 
-function handleResult(command, result) {
-  let { config, inputName } = command
-  let wrap = config && config.wrap
+function handleResult(value) {
+  let wrap
 
-  if (result instanceof Help) {
-    ({ config, inputName } = result.command)
+  if (value instanceof Result) {
+    let { command } = value
+    let { config, inputName } = command || {}
 
-    if (config) {
-      result = composeHelp(config, inputName)
-      wrap = 0
+    if (value instanceof Help) {
+      if (config) {
+        value = composeHelp(config, inputName)
+      } else {
+        value = `Help is unavailable for ${inputName}`
+      }
     } else {
-      result = `Help is unavailable for ${inputName}`
+      value = value.value
+      wrap = config && config.wrap
     }
   }
 
-  if (typeof result !== 'undefined') {
-    print(result, wrap)
+  if (typeof value !== 'undefined') {
+    print(value, wrap)
   }
 }
 
-function handleError(config, err, event) {
+function handleError(err, config, event) {
   if (!(err instanceof InputError)) {
     return print(err, 'error')
   }
 
-  let commandConfig = findRootCommands(config, true)[0]
-  let commandName
+  let errText = chalk.red(err.message)
+  let commandConfig, commandName
 
   if (err.command) {
-    let command = err.command
-    let { fullName, inputName } = command
+    let { fullName, inputName } = err.command
     commandConfig = findCommandByFullName(config, fullName, true)
     commandName = inputName
   } else if (event) {
@@ -70,12 +73,12 @@ function handleError(config, err, event) {
       commandConfig = findCommandByFullName(config, parentName, true)
       commandName = parentName.join(' ')
     }
+  } else if (config) {
+    commandConfig = findRootCommands(config, true)[0]
   }
 
-  let errText = wrap(chalk.red(err.message), commandConfig.wrap)
-
   if (commandConfig) {
-    errText += '\n\n'
+    errText = `${wrap(errText, commandConfig.wrap)}\n\n`
     errText += composeHelp(commandConfig, commandName)
   }
 
@@ -101,14 +104,16 @@ module.exports = function* cliPlugin() {
       try {
         let request = parseArgs(args, config)
         let result = yield yield toot('execute', request)
-        let command = request[request.length - 1]
-        handleResult(command, result)
+        handleResult(result)
       } catch (err) {
-        yield tootWith('error', handleError, err)
+        yield tootWith('error', (config, err, event) => {
+          return handleError(err, config, event)
+        }, err)
       }
     })
   })
 }
 
+module.exports.handleResult = handleResult
 module.exports.interface = ['cli']
 module.exports.tags = ['interface', 'cli']
