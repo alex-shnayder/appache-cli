@@ -114,6 +114,9 @@ module.exports = function* cli() {
   })
 }
 
+module.exports.composeHelp = composeHelp
+module.exports.print = print
 module.exports.handleResult = handleResult
+module.exports.handleError = handleError
 module.exports.interface = ['cli']
 module.exports.tags = ['interface', 'cli']
