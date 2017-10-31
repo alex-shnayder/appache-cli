@@ -85,7 +85,7 @@ function handleError(err, config, event) {
   print(errText, 'error')
 }
 
-module.exports = function* cliPlugin() {
+module.exports = function* cli() {
   yield preHook({
     event: 'schema',
     tags: ['modifyCommandSchema', 'modifyOptionSchema'],
