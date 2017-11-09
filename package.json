@@ -9,7 +9,7 @@
   "license": "ISC",
   "scripts": {
     "precommit": "lint-staged",
-    "test": "mocha src/**/tests/*.js"
+    "test": "mocha"
   },
   "lint-staged": {
     "*.js": [

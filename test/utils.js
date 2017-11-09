@@ -1,6 +1,6 @@
 const assert = require('assert')
 const { describe, it } = require('mocha')
-const { formatColumns } = require('../utils')
+const { formatColumns } = require('../src/utils')
 
 
 describe('formatColumns', () => {
