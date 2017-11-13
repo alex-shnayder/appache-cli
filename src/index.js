@@ -65,10 +65,10 @@ function handleError(err, config, event) {
   } else if (event) {
     let command = getCommandFromEvent(event)
 
-    if (command.config) {
+    if (command && command.config) {
       commandName = command.inputName
       commandConfig = command.config
-    } else {
+    } else if (command) {
       let parentName = command.fullName.slice(0, -1)
       commandConfig = findCommandByFullName(config, parentName, true)
       commandName = parentName.join(' ')
