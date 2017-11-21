@@ -102,8 +102,8 @@ module.exports = function* cli() {
       let args = process.argv.slice(2)
 
       try {
-        let request = parseArgs(args, config)
-        let result = yield yield toot('execute', request)
+        let batch = parseArgs(args, config)
+        let result = yield yield toot('execute', batch)
         handleResult(result)
       } catch (err) {
         yield tootWith('error', (config, err, event) => {
