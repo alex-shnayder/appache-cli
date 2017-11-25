@@ -38,11 +38,16 @@ function makeUsageText(commandConfig, commandName) {
 }
 
 function makeCommandsText(commandConfig, commands) {
-  let rows = commands.map((command) => {
-    let { name, aliases, description } = command
-    let names = aliases ? [name].concat(aliases) : [name]
-    return [names.join(', '), description || '']
-  })
+  let rows = commands
+    .filter((command) => !command.hidden)
+    .map((command) => {
+      let { name, aliases, hiddenNames, description } = command
+      let names = aliases ? [name].concat(aliases) : [name]
+      let namesText = names
+        .filter((name) => !hiddenNames || !hiddenNames.includes(name))
+        .join(', ')
+      return [namesText, description || '']
+    })
   let lineWidth = commandConfig.wrap
   let columnsConfig = Object.assign({}, DEFAULT_COLUMNS_CONFIG, { lineWidth })
   let rowsText = formatColumns(rows, columnsConfig)
@@ -52,14 +57,12 @@ function makeCommandsText(commandConfig, commands) {
 
 function makeOptionsText(commandConfig, options) {
   let rows = options
-    .sort((option) => {
-      return option.isHelpOption ? 1 : 0
-    })
+    .filter((option) => !option.hidden)
     .map((option) => {
-      let { name, aliases, description } = option
+      let { name, aliases, hiddenNames, description } = option
       let names = aliases ? [name].concat(aliases) : [name]
-
       let namesText = names
+        .filter((name) => !hiddenNames || !hiddenNames.includes(name))
         .sort((a, b) => a.length - b.length)
         .map((name) => {
           return (name.length === 1) ? `-${name}` : `--${name}`
@@ -85,6 +88,9 @@ module.exports = function composeHelp(commandConfig, commandName) {
 
   let { options, commands } = commandConfig
   let text = makeUsageText(commandConfig, commandName)
+
+  commands = commands && commands.filter((command) => !command.hidden)
+  options = options && options.filter((option) => !option.hidden)
 
   if (commands && commands.length) {
     text += `\n\n${makeCommandsText(commandConfig, commands)}`
