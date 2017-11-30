@@ -1,8 +1,8 @@
 const chalk = require('chalk')
 const { fork, toot, tootWith, preHook } = require('appache/effects')
 const {
-  findRootCommands, findCommandByFullName, getCommandFromEvent, InputError,
-  Result, Help,
+  findRootCommands, findCommandByFullName, getCommandFromEvent, populateCommand,
+  InputError, Result, Help,
 } = require('appache/common')
 const { wrap } = require('./utils')
 const composeHelp = require('./help')
@@ -26,22 +26,23 @@ function print(value, maxWidth, level = 'log') {
   console[level]()
 }
 
-function handleResult(value) {
+function handleResult(value, config) {
   let wrap
 
   if (value instanceof Result) {
     let { command } = value
-    let { config, inputName } = command || {}
+    let { config: commandConfig, inputName } = command || {}
 
     if (value instanceof Help) {
-      if (config) {
-        value = composeHelp(config, inputName)
+      if (config && commandConfig) {
+        commandConfig = populateCommand(config, commandConfig)
+        value = composeHelp(commandConfig, inputName)
       } else {
         value = `Help is unavailable for ${inputName}`
       }
     } else {
       value = value.value
-      wrap = config && config.wrap
+      wrap = commandConfig && commandConfig.wrap
     }
   }
 
@@ -59,9 +60,8 @@ function handleError(err, config, event) {
   let commandConfig, commandName
 
   if (err.command) {
-    let { fullName, inputName } = err.command
-    commandConfig = findCommandByFullName(config, fullName, true)
-    commandName = inputName
+    commandConfig = err.command.config
+    commandName = err.command.inputName
   } else if (event) {
     let command = getCommandFromEvent(event)
 
@@ -78,6 +78,7 @@ function handleError(err, config, event) {
   }
 
   if (commandConfig) {
+    commandConfig = populateCommand(config, commandConfig)
     errText = `${wrap(errText, commandConfig.wrap)}\n\n`
     errText += composeHelp(commandConfig, commandName)
   }
@@ -104,7 +105,7 @@ module.exports = function* cli() {
       try {
         let batch = parseArgs(args, config)
         let result = yield yield toot('execute', batch)
-        handleResult(result)
+        handleResult(result, config)
       } catch (err) {
         yield tootWith('error', (config, err, event) => {
           return handleError(err, config, event)
