@@ -30,8 +30,7 @@ function tokenizeArgs(args) {
           results.push({
             kind: 'option',
             isLong: false,
-            arg: `-${body}`,
-            body,
+            arg, body,
           })
         })
       }
@@ -57,15 +56,16 @@ function parseArgs(args, config) {
     throw new Error('The CLI interface can only work with exactly one root command')
   }
 
+  let rootCommand = rootCommands[0]
   let {
     commands, options, positionalOptions,
-  } = extractFromCommandConfig(rootCommands[0], config)
-  let currentResult = {
-    name: rootCommands[0].name,
-    inputName: rootCommands[0].name,
+  } = extractFromCommandConfig(rootCommand, config)
+  let currentCommand = {
+    name: rootCommand.name,
+    inputName: rootCommand.name,
     options: [],
   }
-  let results = [currentResult]
+  let batch = [currentCommand]
   let noOptionsMode = false
 
   args = tokenizeArgs(args)
@@ -86,13 +86,13 @@ function parseArgs(args, config) {
           'Short options may only contain letters and numbers. ' +
           `Found "${name}" in "${arg}"`
         )
-        err.command = currentResult
+        err.command = currentCommand
         throw err
       }
 
       if (!name) {
         let err = new InputError('An option\'s name must not be empty')
-        err.command = currentResult
+        err.command = currentCommand
         throw err
       }
 
@@ -118,8 +118,8 @@ function parseArgs(args, config) {
         }
       }
 
-      let inputName = arg
-      currentResult.options.push({ name, inputName, value })
+      let inputName = name
+      currentCommand.options.push({ name, inputName, value })
     } else {
       let command = findOneByNames(commands, body)
       let hasPositionalOptions = Boolean(positionalOptions.length)
@@ -136,16 +136,16 @@ function parseArgs(args, config) {
           positionalOptions = []
         }
 
-        currentResult = {
+        currentCommand = {
           name: body,
           inputName: body,
           options: [],
         }
-        results.push(currentResult)
+        batch.push(currentCommand)
       } else {
         let optionConfig = positionalOptions.shift()
 
-        currentResult.options.push({
+        currentCommand.options.push({
           name: optionConfig.name,
           inputName: optionConfig.name,
           value: body,
@@ -154,7 +154,7 @@ function parseArgs(args, config) {
     }
   }
 
-  return results
+  return batch
 }
 
 module.exports = parseArgs
