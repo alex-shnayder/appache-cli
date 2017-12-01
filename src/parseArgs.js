@@ -1,5 +1,5 @@
 const {
-  InputError, findByIds, findOneByNames, findRootCommands,
+  InputError, findByIds, findOneByNames, findDefaultRootCommand,
 } = require('appache/common')
 
 
@@ -50,19 +50,18 @@ function extractFromCommandConfig(commandConfig, config) {
 }
 
 function parseArgs(args, config) {
-  let rootCommands = findRootCommands(config)
+  let defaultCommand = findDefaultRootCommand(config)
 
-  if (rootCommands.length !== 1) {
-    throw new Error('The CLI interface can only work with exactly one root command')
+  if (!defaultCommand) {
+    throw new Error('For the CLI plugin to work, a default root command must be set')
   }
 
-  let rootCommand = rootCommands[0]
   let {
     commands, options, positionalOptions,
-  } = extractFromCommandConfig(rootCommand, config)
+  } = extractFromCommandConfig(defaultCommand, config)
   let currentCommand = {
-    name: rootCommand.name,
-    inputName: rootCommand.name,
+    name: defaultCommand.name,
+    inputName: defaultCommand.name,
     options: [],
   }
   let batch = [currentCommand]
