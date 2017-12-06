@@ -88,7 +88,7 @@ function handleError(err, config, event) {
 
 module.exports = function* cli() {
   yield preHook({
-    event: 'schema',
+    event: 'schematize',
     tags: ['modifyCommandSchema', 'modifyOptionSchema'],
   }, (schema) => {
     schema = modifySchema(schema)
