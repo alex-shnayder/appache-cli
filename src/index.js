@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { fork, toot, tootWith, preHook } = require('appache/effects')
+const { fork, tootWith, preHook, execute } = require('appache/effects')
 const {
   findRootCommands, findCommandByFullName, getCommandFromEvent, populateCommand,
   InputError, Result, Help,
@@ -104,7 +104,7 @@ module.exports = function* cli() {
 
       try {
         let batch = parseArgs(args, config)
-        let result = yield yield toot('execute', batch)
+        let result = yield yield execute(batch)
         handleResult(result, config)
       } catch (err) {
         yield tootWith('error', (config, err, event) => {
