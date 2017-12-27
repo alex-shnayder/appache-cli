@@ -1,5 +1,5 @@
 const {
-  InputError, findByIds, findOneByNames, findDefaultRootCommand,
+  InputError, findByIds, findOneByNames, findDefaultCommand,
 } = require('appache/common')
 
 
@@ -50,7 +50,7 @@ function extractFromCommandConfig(commandConfig, config) {
 }
 
 function parseArgs(args, config) {
-  let defaultCommand = findDefaultRootCommand(config)
+  let defaultCommand = findDefaultCommand(config)
 
   if (!defaultCommand) {
     throw new Error('For the CLI plugin to work, a default root command must be set')
