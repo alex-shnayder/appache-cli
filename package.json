@@ -3,9 +3,9 @@
   "version": "0.3.1",
   "description": "",
   "author": "Alex Shnayder <alex@shnayder.pro>",
-  "repository": "alex-shnayder/appache-cli",
-  "homepage": "https://github.com/alex-shnayder/appache-cli#readme",
-  "bugs": "https://github.com/alex-shnayder/appache-cli/issues",
+  "repository": "appache/appache-cli",
+  "homepage": "https://github.com/appache/appache-cli#readme",
+  "bugs": "https://github.com/appache/appache-cli/issues",
   "license": "ISC",
   "scripts": {
     "precommit": "lint-staged",
