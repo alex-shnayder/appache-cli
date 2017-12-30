@@ -5,33 +5,38 @@ const modifySchema = require('./modifySchema')
 const { print, handleResult, handleError } = require('./handling')
 
 
+function schematizeHandler(schema) {
+  schema = modifySchema(schema)
+  return [schema]
+}
+
+function* activateHandler(config) {
+  yield fork('async', function* () {
+    let args = process.argv.slice(2)
+
+    try {
+      let batch = parseArgs(args, config)
+      let result = yield yield execute(batch)
+      handleResult(result, config)
+    } catch (err) {
+      yield tootWith('error', (config, err, event) => {
+        return handleError(err, config, event)
+      }, err)
+    }
+  })
+}
+
+
 module.exports = function* cli() {
   yield preHook({
     event: 'schematize',
     tags: ['modifyCommandSchema', 'modifyOptionSchema'],
-  }, (schema) => {
-    schema = modifySchema(schema)
-    return [schema]
-  })
+  }, schematizeHandler)
 
   yield preHook({
     event: 'activate',
     tags: ['interface'],
-  }, function* (config) {
-    yield fork('async', function* () {
-      let args = process.argv.slice(2)
-
-      try {
-        let batch = parseArgs(args, config)
-        let result = yield yield execute(batch)
-        handleResult(result, config)
-      } catch (err) {
-        yield tootWith('error', (config, err, event) => {
-          return handleError(err, config, event)
-        }, err)
-      }
-    })
-  })
+  }, activateHandler)
 }
 
 module.exports.composeHelp = composeHelp
