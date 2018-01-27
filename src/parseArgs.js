@@ -64,8 +64,23 @@ function parseArgs(args, config) {
     inputName: defaultCommand.name,
     options: [],
   }
+  let currentOptionsByName = {}
   let batch = [currentCommand]
   let noOptionsMode = false
+
+  let addOption = (name, value) => {
+    let option = currentOptionsByName[name]
+
+    if (option && Array.isArray(option.value)) {
+      option.value.push(value)
+    } else if (option) {
+      option.value = [option.value, value]
+    } else {
+      option = { name, inputName: name, value }
+      currentOptionsByName[name] = option
+      currentCommand.options.push(option)
+    }
+  }
 
   args = tokenizeArgs(args)
 
@@ -96,14 +111,14 @@ function parseArgs(args, config) {
       }
 
       let optionConfig = findOneByNames(options, name)
+      let { type, consume } = (optionConfig || {})
 
       if (isLong && eqPos) {
         value = body.substr(eqPos + 1)
-      } else if (!isLong && optionConfig) {
-        let { consume, type } = optionConfig
+      } else if (!isLong) {
         let nextArg = args[i + 1]
 
-        if (typeof consume === 'undefined') {
+        if (type && typeof consume === 'undefined') {
           consume = CONSUME_BY_TYPE[type]
         }
 
@@ -117,8 +132,7 @@ function parseArgs(args, config) {
         }
       }
 
-      let inputName = name
-      currentCommand.options.push({ name, inputName, value })
+      addOption(name, value)
     } else {
       let command = findOneByNames(commands, body)
       let hasPositionalOptions = Boolean(positionalOptions.length)
@@ -135,6 +149,7 @@ function parseArgs(args, config) {
           positionalOptions = []
         }
 
+        currentOptionsByName = {}
         currentCommand = {
           name: body,
           inputName: body,
@@ -143,12 +158,7 @@ function parseArgs(args, config) {
         batch.push(currentCommand)
       } else {
         let optionConfig = positionalOptions.shift()
-
-        currentCommand.options.push({
-          name: optionConfig.name,
-          inputName: optionConfig.name,
-          value: body,
-        })
+        addOption(optionConfig.name, body)
       }
     }
   }
